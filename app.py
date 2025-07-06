@@ -28,7 +28,7 @@ if uploaded_file:
 
 if context:
     question = st.text_input("Ask a question:")
-    if st.button("Ask") and question:
+    if question:
         answer = ask_question(context, question)
         chat_history.append(("You", question))
         chat_history.append(("AI", answer))
