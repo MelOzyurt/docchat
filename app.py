@@ -5,7 +5,7 @@ from utils.qa import ask_question
 st.set_page_config(page_title="Chat with Your Document")
 
 # Show custom icon image at the top
-st.image("assets/doc_icon.png", width=60)  # Adjust width as needed
+st.image("doc_icon.png", width=60)  # Adjust width as needed
 st.title("Chat with Your Document")
 st.markdown("Upload a document and ask questions about its content.")
 
