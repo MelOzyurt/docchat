@@ -7,14 +7,13 @@ st.set_page_config(page_title="📄 Chat with Your Document")
 st.title("📄 Chat with Your Document")
 st.markdown("Upload a document and ask questions about its content.")
 
-# Initialize session state for chat history and context
+# Initialize state
 chat_history = st.session_state.setdefault("chat_history", [])
 context = st.session_state.setdefault("doc_text", "")
 
-# File uploader
+# File upload
 uploaded_file = st.file_uploader(
-    "Upload file (PDF, DOCX, CSV, XLSX)",
-    type=["pdf", "docx", "csv", "xls", "xlsx"]
+    "Upload file (PDF, DOCX, CSV, XLSX)", type=["pdf", "docx", "csv", "xls", "xlsx"]
 )
 
 if uploaded_file:
@@ -29,22 +28,28 @@ if uploaded_file:
         context = extract_text_from_excel(uploaded_file)
     else:
         st.error("Unsupported file type.")
-    # Save truncated context for token limits
-    st.session_state.doc_text = context[:100000]
+    st.session_state.doc_text = context[:100000]  # truncate to avoid token limits
 
-# Display chat messages
+# Display all previous messages
 for sender, msg in chat_history:
-    st.chat_message(sender.lower()).write(msg)
+    with st.chat_message("user" if sender == "You" else "ai"):
+        st.markdown(msg)
 
-# Input form at bottom
-with st.form(key="chat_form", clear_on_submit=True):
-    question = st.text_input("Ask a question:")
-    send = st.form_submit_button("Send")
+# Chat input at bottom, using chat_input (ENTER key submits automatically)
+if context:
+    user_input = st.chat_input("Ask something about the document...")
 
-if send and question and context:
-    answer = ask_question(context, question)
-    chat_history.append(("You", question))
-    chat_history.append(("AI", answer))
-    st.experimental_rerun()
-elif send and not context:
-    st.warning("Please upload a document first.")
+    if user_input:
+        # Add user's message to history
+        st.session_state.chat_history.append(("You", user_input))
+
+        # Generate AI answer
+        answer = ask_question(context, user_input)
+
+        # Add AI's response to history
+        st.session_state.chat_history.append(("AI", answer))
+
+        # Re-run to show latest chat messages
+        st.rerun()
+else:
+    st.info("Please upload a document first.")
