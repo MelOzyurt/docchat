@@ -1,15 +1,16 @@
 import openai
-import streamlit as st
-
-# OpenAI API key is securely read from Streamlit secrets
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+import os
 
 def ask_question(context, question):
-    response = openai.ChatCompletion.create(
+    client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+    response = client.chat.completions.create(
         model="gpt-4.0",
         messages=[
-            {"role": "system", "content": "You answer questions based only on the uploaded content."},
-            {"role": "user", "content": f"Context: {context}\n\nQuestion: {question}"}
+            {"role": "system", "content": "You are a helpful assistant that answers questions about a document."},
+            {"role": "user", "content": f"Document: {context}"},
+            {"role": "user", "content": f"Question: {question}"}
         ]
     )
+
     return response.choices[0].message.content.strip()
